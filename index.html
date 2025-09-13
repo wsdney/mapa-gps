@@ -29,45 +29,50 @@
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
   <script>
-    window.ativarModoAdicionar = () => {
-      window.modoAdicionar = true;
-      alert("Modo de adição ou edição ativado. Clique no mapa para marcar ou mover o grupo.");
-    };
+  function removerAcentos(str) {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  }
 
-    window.editarGrupo = (id, nome, endereco) => {
-      document.getElementById("nomeGrupo").value = nome;
-      document.getElementById("enderecoGrupo").value = endereco;
-      window.modoAdicionar = true;
-      window.grupoEditando = id;
-      alert("Modo edição ativado. Clique no novo local no mapa.");
-    };
+  window.ativarModoAdicionar = () => {
+    window.modoAdicionar = true;
+    alert("Modo de adição ou edição ativado. Clique no mapa para marcar ou mover o grupo.");
+  };
 
-    window.excluirGrupo = async (id) => {
-      const { getDatabase, ref, remove } = await import("https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js");
-      const db = getDatabase();
-      await remove(ref(db, 'grupos/' + id));
-      alert("Grupo excluído");
-      location.reload();
-    };
+  window.editarGrupo = (id, nome, endereco) => {
+    document.getElementById("nomeGrupo").value = nome;
+    document.getElementById("enderecoGrupo").value = endereco;
+    window.modoAdicionar = true;
+    window.grupoEditando = id;
+    alert("Modo edição ativado. Clique no novo local no mapa.");
+  };
 
-    window.buscarGrupo = (nomeBuscado) => {
-      const marcadores = window.todosMarcadores || [];
-      const grupo = marcadores.find(m => m.nome.toLowerCase() === nomeBuscado.toLowerCase());
-      if (grupo) {
-        grupo.marker.openPopup();
-        grupo.marker._map.setView([grupo.lat, grupo.lng], 16);
-      } else {
-        alert("Grupo não encontrado.");
-      }
-    };
+  window.excluirGrupo = async (id) => {
+    const { getDatabase, ref, remove } = await import("https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js");
+    const db = getDatabase();
+    await remove(ref(db, 'grupos/' + id));
+    alert("Grupo excluído");
+    location.reload();
+  };
 
-    document.getElementById("buscaGrupo").addEventListener("keypress", function(e) {
-      if (e.key === "Enter") {
-        const nome = e.target.value.trim();
-        if (nome) buscarGrupo(nome);
-      }
-    });
-  </script>
+  window.buscarGrupo = (nomeBuscado) => {
+    const marcadores = window.todosMarcadores || [];
+    const nomeLimpo = removerAcentos(nomeBuscado.toLowerCase());
+    const grupo = marcadores.find(m => removerAcentos(m.nome.toLowerCase()).includes(nomeLimpo));
+    if (grupo) {
+      grupo.marker.openPopup();
+      grupo.marker._map.setView([grupo.lat, grupo.lng], 16);
+    } else {
+      alert("Grupo não encontrado.");
+    }
+  };
+
+  document.getElementById("buscaGrupo").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+      const nome = e.target.value.trim();
+      if (nome) buscarGrupo(nome);
+    }
+  });
+</script>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
@@ -153,3 +158,4 @@
   </script>
 </body>
 </html>
+
