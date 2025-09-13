@@ -12,22 +12,21 @@
       background: white; padding: 10px; border-radius: 8px;
       box-shadow: 0 0 10px rgba(0,0,0,0.3);
     }
-    #formulario input { width: 180px; padding: 6px; margin-right: 6px; }
-    #formulario button { padding: 6px 12px; background: #1976d2; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    #formulario input { width: 180px; padding: 6px; margin-bottom: 6px; display: block; }
+    #formulario button { padding: 6px 12px; background: #1976d2; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; }
     #formulario button:hover { background: #125a9c; }
   </style>
 </head>
 <body>
   <div id="formulario">
     <input type="text" id="nomeGrupo" placeholder="Nome do Grupo" />
+    <input type="text" id="enderecoGrupo" placeholder="Endereço completo" />
     <button onclick="ativarModoAdicionar()">Adicionar Grupo</button>
   </div>
   <div id="map"></div>
 
-  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-  <!-- Expor função global para o botão funcionar -->
   <script>
     window.ativarModoAdicionar = () => {
       window.modoAdicionar = true;
@@ -35,7 +34,6 @@
     };
   </script>
 
-  <!-- Firebase + lógica do mapa -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
     import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
@@ -74,17 +72,19 @@
 
     map.on('click', async function(e) {
       if (!window.modoAdicionar) return;
+
       const nome = document.getElementById("nomeGrupo").value.trim();
-      if (!nome) return alert("Digite o nome do grupo");
+      const endereco = document.getElementById("enderecoGrupo").value.trim();
+      if (!nome || !endereco) return alert("Preencha o nome e o endereço");
 
       const lat = e.latlng.lat;
       const lng = e.latlng.lng;
       const id = Date.now();
 
-      await set(ref(db, 'grupos/' + id), { nome, lat, lng });
+      await set(ref(db, 'grupos/' + id), { nome, endereco, lat, lng });
 
       L.marker([lat, lng]).addTo(map)
-        .bindTooltip(nome, { permanent: true, direction: 'top', offset: [0, -10] });
+        .bindPopup(`<strong>${nome}</strong><br>${endereco}`);
 
       window.modoAdicionar = false;
     });
@@ -94,7 +94,7 @@
         const grupos = snapshot.val();
         Object.values(grupos).forEach(g => {
           L.marker([g.lat, g.lng]).addTo(map)
-            .bindTooltip(g.nome, { permanent: true, direction: 'top', offset: [0, -10] });
+            .bindPopup(`<strong>${g.nome}</strong><br>${g.endereco}`);
         });
       }
     });
