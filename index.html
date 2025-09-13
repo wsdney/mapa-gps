@@ -8,94 +8,108 @@
     html, body { margin: 0; padding: 0; height: 100%; }
     #map { height: 100vh; width: 100%; }
     #formulario {
-      position: absolute; top: 10px; left: 60px; z-index: 1000;
+      position: absolute; top: 10px; left: 10px; z-index: 1000;
       background: white; padding: 10px; border-radius: 8px;
       box-shadow: 0 0 10px rgba(0,0,0,0.3);
     }
-    #formulario input { width: 180px; padding: 6px; margin-bottom: 6px; display: block; }
-    #formulario button { padding: 6px 12px; background: #1976d2; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; }
-    #formulario button:hover { background: #125a9c; }
+    #formulario input {
+      width: 180px; padding: 6px; margin-bottom: 6px; display: block;
+    }
+    #formulario .botoes {
+      display: flex; gap: 6px; margin-bottom: 6px;
+    }
+    #formulario button {
+      padding: 6px 10px;
+      background: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      flex: 1;
+    }
+    #formulario button:hover {
+      background: #125a9c;
+    }
   </style>
 </head>
 <body>
-<!-- Dentro da <div id="formulario"> -->
-<div id="formulario">
-  <input type="text" id="nomeGrupo" placeholder="Nome do Grupo" />
-  <input type="text" id="enderecoGrupo" placeholder="Endereço completo" />
-  <input type="text" id="buscaGrupo" placeholder="Buscar grupo por nome" />
-  <button onclick="ativarModoAdicionar()">Adicionar ou Editar Grupo</button>
-  <button onclick="exportarCSV()">📤 Exportar para Excel</button>
-</div>
-
+  <div id="formulario">
+    <input type="text" id="nomeGrupo" placeholder="Nome do Grupo" />
+    <input type="text" id="enderecoGrupo" placeholder="Endereço completo" />
+    <div class="botoes">
+      <button onclick="ativarModoAdicionar()">Adicionar ou Editar Grupo</button>
+      <button onclick="exportarCSV()">📤 Exportar para Excel</button>
+    </div>
+    <input type="text" id="buscaGrupo" placeholder="Buscar grupo por nome" />
+  </div>
   <div id="map"></div>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-  <!-- Script fora do módulo -->
-<script>
-  function removerAcentos(str) {
-    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  }
-
-  window.ativarModoAdicionar = () => {
-    window.modoAdicionar = true;
-    alert("Modo de adição ou edição ativado. Clique no mapa para marcar ou mover o grupo.");
-  };
-
-  window.editarGrupo = (id, nome, endereco) => {
-    document.getElementById("nomeGrupo").value = nome;
-    document.getElementById("enderecoGrupo").value = endereco;
-    window.modoAdicionar = true;
-    window.grupoEditando = id;
-    alert("Modo edição ativado. Clique no novo local no mapa.");
-  };
-
-  window.excluirGrupo = async (id) => {
-    const { getDatabase, ref, remove } = await import("https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js");
-    const db = getDatabase();
-    await remove(ref(db, 'grupos/' + id));
-    alert("Grupo excluído");
-    location.reload();
-  };
-
-  window.buscarGrupo = (nomeBuscado) => {
-    const marcadores = window.todosMarcadores || [];
-    const nomeLimpo = removerAcentos(nomeBuscado.toLowerCase());
-    const grupo = marcadores.find(m => removerAcentos(m.nome.toLowerCase()).includes(nomeLimpo));
-    if (grupo) {
-      grupo.marker.openPopup();
-      grupo.marker._map.setView([grupo.lat, grupo.lng], 16);
-    } else {
-      alert("Grupo não encontrado.");
+  <script>
+    function removerAcentos(str) {
+      return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     }
-  };
 
-  document.getElementById("buscaGrupo").addEventListener("keypress", function(e) {
-    if (e.key === "Enter") {
-      const nome = e.target.value.trim();
-      if (nome) buscarGrupo(nome);
-    }
-  });
+    window.ativarModoAdicionar = () => {
+      window.modoAdicionar = true;
+      alert("Modo de adição ou edição ativado. Clique no mapa para marcar ou mover o grupo.");
+    };
 
-  window.exportarCSV = () => {
-    const grupos = window.todosMarcadores || [];
-    if (grupos.length === 0) return alert("Nenhum grupo para exportar.");
+    window.editarGrupo = (id, nome, endereco) => {
+      document.getElementById("nomeGrupo").value = nome;
+      document.getElementById("enderecoGrupo").value = endereco;
+      window.modoAdicionar = true;
+      window.grupoEditando = id;
+      alert("Modo edição ativado. Clique no novo local no mapa.");
+    };
 
-    const linhas = [["Nome", "Endereço", "Latitude", "Longitude"]];
-    grupos.forEach(g => {
-      const popup = g.marker.getPopup()?.getContent() || "";
-      const endereco = popup.split("<br>")[1]?.trim() || "";
-      linhas.push([g.nome, endereco, g.lat, g.lng]);
+    window.excluirGrupo = async (id) => {
+      const { getDatabase, ref, remove } = await import("https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js");
+      const db = getDatabase();
+      await remove(ref(db, 'grupos/' + id));
+      alert("Grupo excluído");
+      location.reload();
+    };
+
+    window.buscarGrupo = (nomeBuscado) => {
+      const marcadores = window.todosMarcadores || [];
+      const nomeLimpo = removerAcentos(nomeBuscado.toLowerCase());
+      const grupo = marcadores.find(m => removerAcentos(m.nome.toLowerCase()).includes(nomeLimpo));
+      if (grupo) {
+        grupo.marker.openPopup();
+        grupo.marker._map.setView([grupo.lat, grupo.lng], 16);
+      } else {
+        alert("Grupo não encontrado.");
+      }
+    };
+
+    document.getElementById("buscaGrupo").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        const nome = e.target.value.trim();
+        if (nome) buscarGrupo(nome);
+      }
     });
 
-    const csv = linhas.map(l => l.map(v => `"${v}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "grupos.csv";
-    link.click();
-  };
-</script>
+    window.exportarCSV = () => {
+      const grupos = window.todosMarcadores || [];
+      if (grupos.length === 0) return alert("Nenhum grupo para exportar.");
+
+      const linhas = [["Nome", "Endereço", "Latitude", "Longitude"]];
+      grupos.forEach(g => {
+        const popup = g.marker.getPopup()?.getContent() || "";
+        const endereco = popup.split("<br>")[1]?.trim() || "";
+        linhas.push([g.nome, endereco, g.lat, g.lng]);
+      });
+
+      const csv = linhas.map(l => l.map(v => `"${v}"`).join(",")).join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "grupos.csv";
+      link.click();
+    };
+  </script>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
@@ -181,7 +195,3 @@
   </script>
 </body>
 </html>
-
-
-
-
