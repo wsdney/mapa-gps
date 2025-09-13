@@ -21,7 +21,7 @@
   <div id="formulario">
     <input type="text" id="nomeGrupo" placeholder="Nome do Grupo" />
     <input type="text" id="enderecoGrupo" placeholder="Endereço completo" />
-    <button onclick="ativarModoAdicionar()">Adicionar Grupo</button>
+    <button onclick="ativarModoAdicionar()">Adicionar ou Editar Grupo</button>
   </div>
   <div id="map"></div>
 
@@ -30,7 +30,23 @@
   <script>
     window.ativarModoAdicionar = () => {
       window.modoAdicionar = true;
-      alert("Modo de adição ativado. Clique no mapa para marcar o grupo.");
+      alert("Modo de adição ou edição ativado. Clique no mapa para marcar ou mover o grupo.");
+    };
+
+    window.editarGrupo = (id, nome, endereco) => {
+      document.getElementById("nomeGrupo").value = nome;
+      document.getElementById("enderecoGrupo").value = endereco;
+      window.modoAdicionar = true;
+      window.grupoEditando = id;
+      alert("Modo edição ativado. Clique no novo local no mapa.");
+    };
+
+    window.excluirGrupo = async (id) => {
+      const { getDatabase, ref, remove } = await import("https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js");
+      const db = getDatabase();
+      await remove(ref(db, 'grupos/' + id));
+      alert("Grupo excluído");
+      location.reload();
     };
   </script>
 
@@ -69,6 +85,7 @@
     }).addTo(map);
 
     window.modoAdicionar = false;
+    window.grupoEditando = null;
 
     map.on('click', async function(e) {
       if (!window.modoAdicionar) return;
@@ -79,28 +96,36 @@
 
       const lat = e.latlng.lat;
       const lng = e.latlng.lng;
-      const id = Date.now();
+      const id = window.grupoEditando || Date.now();
 
       await set(ref(db, 'grupos/' + id), { nome, endereco, lat, lng });
 
       L.marker([lat, lng]).addTo(map)
         .bindTooltip(nome, { permanent: true, direction: 'top', offset: [0, -10] })
-        .bindPopup(`<strong>${nome}</strong><br>${endereco}`);
+        .bindPopup(`
+          <strong>${nome}</strong><br>${endereco}<br><br>
+          <button onclick="editarGrupo('${id}', '${nome}', '${endereco}')">✏️ Editar</button>
+          <button onclick="excluirGrupo('${id}')">🗑️ Excluir</button>
+        `);
 
       window.modoAdicionar = false;
+      window.grupoEditando = null;
     });
 
     get(child(ref(db), 'grupos')).then(snapshot => {
       if (snapshot.exists()) {
         const grupos = snapshot.val();
-        Object.values(grupos).forEach(g => {
+        Object.entries(grupos).forEach(([id, g]) => {
           L.marker([g.lat, g.lng]).addTo(map)
             .bindTooltip(g.nome, { permanent: true, direction: 'top', offset: [0, -10] })
-            .bindPopup(`<strong>${g.nome}</strong><br>${g.endereco}`);
+            .bindPopup(`
+              <strong>${g.nome}</strong><br>${g.endereco}<br><br>
+              <button onclick="editarGrupo('${id}', '${g.nome}', '${g.endereco}')">✏️ Editar</button>
+              <button onclick="excluirGrupo('${id}')">🗑️ Excluir</button>
+            `);
         });
       }
     });
   </script>
 </body>
 </html>
-
