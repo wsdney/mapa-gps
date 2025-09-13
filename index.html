@@ -67,22 +67,25 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    const map = L.map('map').setView([-23.6629, -52.6057], 14);
+<!-- trecho relevante dentro do <script type="module"> -->
+const map = L.map('map').setView([-23.6629, -52.6057], 14);
 
-    const mapaPadrao = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap'
-    });
+const mapaPadrao = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap'
+});
 
-    const mapaSatelite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      attribution: '© Esri & contributors'
-    });
+const mapaSatelite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+  attribution: '© Esri & contributors'
+});
 
-    mapaPadrao.addTo(map);
+// ✅ Agora o mapa abre direto no satélite
+mapaSatelite.addTo(map);
 
-    L.control.layers({
-      "Mapa Padrão": mapaPadrao,
-      "Satélite": mapaSatelite
-    }).addTo(map);
+L.control.layers({
+  "Mapa Padrão": mapaPadrao,
+  "Satélite": mapaSatelite
+}).addTo(map);
+
 
     window.modoAdicionar = false;
     window.grupoEditando = null;
@@ -129,3 +132,4 @@
   </script>
 </body>
 </html>
+
