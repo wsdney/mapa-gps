@@ -8,7 +8,7 @@
     html, body { margin: 0; padding: 0; height: 100%; }
     #map { height: 100vh; width: 100%; }
     #formulario {
-      position: absolute; top: 10px; left: 80px; z-index: 1000;
+      position: absolute; top: 10px; left: 10px; z-index: 1000;
       background: white; padding: 10px; border-radius: 8px;
       box-shadow: 0 0 10px rgba(0,0,0,0.3);
     }
@@ -24,6 +24,7 @@
   </div>
   <div id="map"></div>
 
+  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
   <!-- Expor função global para o botão funcionar -->
@@ -52,21 +53,22 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-const mapaPadrao = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '© OpenStreetMap'
-});
+    const map = L.map('map').setView([-23.6629, -52.6057], 14);
 
-const mapaSatelite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-  attribution: '© Esri & contributors'
-});
+    const mapaPadrao = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    });
 
-mapaPadrao.addTo(map);
+    const mapaSatelite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: '© Esri & contributors'
+    });
 
-L.control.layers({
-  "Mapa Padrão": mapaPadrao,
-  "Satélite": mapaSatelite
-}).addTo(map);
+    mapaPadrao.addTo(map);
 
+    L.control.layers({
+      "Mapa Padrão": mapaPadrao,
+      "Satélite": mapaSatelite
+    }).addTo(map);
 
     window.modoAdicionar = false;
 
@@ -99,4 +101,3 @@ L.control.layers({
   </script>
 </body>
 </html>
-
