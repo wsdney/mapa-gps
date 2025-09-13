@@ -8,24 +8,22 @@
     html, body { margin: 0; padding: 0; height: 100%; }
     #map { height: 100vh; width: 100%; }
     #formulario {
-      position: absolute; top: 10px; left: 10px; z-index: 1000;
+      position: absolute; top: 10px; left: 60px; z-index: 1000;
       background: white; padding: 10px; border-radius: 8px;
       box-shadow: 0 0 10px rgba(0,0,0,0.3);
     }
     #formulario input {
       width: 180px; padding: 6px; margin-bottom: 6px; display: block;
     }
-    #formulario .botoes {
-      display: flex; gap: 6px; margin-bottom: 6px;
-    }
     #formulario button {
+      width: 100%;
       padding: 6px 10px;
       background: #1976d2;
       color: white;
       border: none;
       border-radius: 5px;
       cursor: pointer;
-      flex: 1;
+      margin-bottom: 6px;
     }
     #formulario button:hover {
       background: #125a9c;
@@ -36,10 +34,8 @@
   <div id="formulario">
     <input type="text" id="nomeGrupo" placeholder="Nome do Grupo" />
     <input type="text" id="enderecoGrupo" placeholder="Endereço completo" />
-    <div class="botoes">
-      <button onclick="ativarModoAdicionar()">Adicionar ou Editar Grupo</button>
-      <button onclick="exportarCSV()">📤 Exportar para Excel</button>
-    </div>
+    <button onclick="ativarModoAdicionar()">Adicionar ou Editar Grupo</button>
+    <button onclick="exportarCSV()">📤 Exportar para Excel</button>
     <input type="text" id="buscaGrupo" placeholder="Buscar grupo por nome" />
   </div>
   <div id="map"></div>
