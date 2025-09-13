@@ -28,7 +28,8 @@
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-  <script>
+  <!-- Script fora do módulo -->
+<script>
   function removerAcentos(str) {
     return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   }
@@ -72,6 +73,25 @@
       if (nome) buscarGrupo(nome);
     }
   });
+
+  window.exportarCSV = () => {
+    const grupos = window.todosMarcadores || [];
+    if (grupos.length === 0) return alert("Nenhum grupo para exportar.");
+
+    const linhas = [["Nome", "Endereço", "Latitude", "Longitude"]];
+    grupos.forEach(g => {
+      const popup = g.marker.getPopup()?.getContent() || "";
+      const endereco = popup.split("<br>")[1]?.trim() || "";
+      linhas.push([g.nome, endereco, g.lat, g.lng]);
+    });
+
+    const csv = linhas.map(l => l.map(v => `"${v}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "grupos.csv";
+    link.click();
+  };
 </script>
 
   <script type="module">
@@ -158,5 +178,6 @@
   </script>
 </body>
 </html>
+
 
 
