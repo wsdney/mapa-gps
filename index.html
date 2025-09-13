@@ -48,7 +48,7 @@
       attribution: '© OpenStreetMap'
     }).addTo(map);
 
-    let modoAdicionar = false;
+    window.modoAdicionar = false;
 
     function ativarModoAdicionar() {
       modoAdicionar = true;
@@ -82,6 +82,14 @@
       }
     });
   </script>
+  <script>
+  // Expor a função para o botão
+  window.ativarModoAdicionar = () => {
+    window.modoAdicionar = true;
+    alert("Modo de adição ativado. Clique no mapa para marcar o grupo.");
+  };
+</script>
 </body>
 </html>
+
 
