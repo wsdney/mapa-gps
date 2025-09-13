@@ -71,4 +71,20 @@
       await set(ref(db, 'grupos/' + id), { nome, lat, lng });
 
       L.marker([lat, lng]).addTo(map)
-        .bindTooltip(nome
+        .bindTooltip(nome, { permanent: true, direction: 'top', offset: [0, -10] });
+
+      window.modoAdicionar = false;
+    });
+
+    get(child(ref(db), 'grupos')).then(snapshot => {
+      if (snapshot.exists()) {
+        const grupos = snapshot.val();
+        Object.values(grupos).forEach(g => {
+          L.marker([g.lat, g.lng]).addTo(map)
+            .bindTooltip(g.nome, { permanent: true, direction: 'top', offset: [0, -10] });
+        });
+      }
+    });
+  </script>
+</body>
+</html>
