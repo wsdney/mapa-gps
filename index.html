@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Mapa de Grupos</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; }
+    #map { height: 100vh; width: 100%; }
+    #formulario {
+      position: absolute; top: 10px; left: 10px; z-index: 1000;
+      background: white; padding: 10px; border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+    #formulario input { width: 180px; padding: 6px; margin-right: 6px; }
+    #formulario button { padding: 6px 12px; background: #1976d2; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    #formulario button:hover { background: #125a9c; }
+  </style>
+</head>
+<body>
+  <div id="formulario">
+    <input type="text" id="nomeGrupo" placeholder="Nome do Grupo" />
+    <button onclick="ativarModoAdicionar()">Adicionar Grupo</button>
+  </div>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDpXPkobIHUvWHPijM3J8VXPrILyIFti6A",
+      authDomain: "gpslocalsbackend.firebaseapp.com",
+      databaseURL: "https://gpslocalsbackend-default-rtdb.firebaseio.com",
+      projectId: "gpslocalsbackend",
+      storageBucket: "gpslocalsbackend.appspot.com",
+      messagingSenderId: "587842449786",
+      appId: "1:587842449786:web:2a41f86212057feacc66c3"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const map = L.map('map').setView([-23.4206, -51.9398], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    let modoAdicionar = false;
+
+    function ativarModoAdicionar() {
+      modoAdicionar = true;
+      alert("Modo de adição ativado. Clique no mapa para marcar o grupo.");
+    }
+
+    map.on('click', async function(e) {
+      if (!modoAdicionar) return;
+      const nome = document.getElementById("nomeGrupo").value.trim();
+      if (!nome) return alert("Digite o nome do grupo");
+
+      const lat = e.latlng.lat;
+      const lng = e.latlng.lng;
+      const id = Date.now();
+
+      await set(ref(db, 'grupos/' + id), { nome, lat, lng });
+
+      L.marker([lat, lng]).addTo(map)
+        .bindTooltip(nome, { permanent: true, direction: 'top', offset: [0, -10] });
+
+      modoAdicionar = false;
+    });
+
+    get(child(ref(db), 'grupos')).then(snapshot => {
+      if (snapshot.exists()) {
+        const grupos = snapshot.val();
+        Object.values(grupos).forEach(g => {
+          L.marker([g.lat, g.lng]).addTo(map)
+            .bindTooltip(g.nome, { permanent: true, direction: 'top', offset: [0, -10] });
+        });
+      }
+    });
+  </script>
+</body>
+</html>
