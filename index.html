@@ -84,6 +84,7 @@
       await set(ref(db, 'grupos/' + id), { nome, endereco, lat, lng });
 
       L.marker([lat, lng]).addTo(map)
+        .bindTooltip(nome, { permanent: true, direction: 'top', offset: [0, -10] })
         .bindPopup(`<strong>${nome}</strong><br>${endereco}`);
 
       window.modoAdicionar = false;
@@ -94,6 +95,7 @@
         const grupos = snapshot.val();
         Object.values(grupos).forEach(g => {
           L.marker([g.lat, g.lng]).addTo(map)
+            .bindTooltip(g.nome, { permanent: true, direction: 'top', offset: [0, -10] })
             .bindPopup(`<strong>${g.nome}</strong><br>${g.endereco}`);
         });
       }
