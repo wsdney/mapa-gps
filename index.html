@@ -26,19 +26,28 @@
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
+  <!-- Expor função global para o botão funcionar -->
+  <script>
+    window.ativarModoAdicionar = () => {
+      window.modoAdicionar = true;
+      alert("Modo de adição ativado. Clique no mapa para marcar o grupo.");
+    };
+  </script>
+
+  <!-- Firebase + lógica do mapa -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
     import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 
     const firebaseConfig = {
-  apiKey: "AIzaSyDpXPkobIHUvWHPijM3J8VXPrILyIFti6A",
-  authDomain: "gpslocalsbackend.firebaseapp.com",
-  databaseURL: "https://gpslocalsbackend-default-rtdb.firebaseio.com",
-  projectId: "gpslocalsbackend",
-  storageBucket: "gpslocalsbackend.appspot.com",
-  messagingSenderId: "587842449786",
-  appId: "1:587842449786:web:2a41f86212057feacc66c3"
-};
+      apiKey: "AIzaSyDpXPkobIHUvWHPijM3J8VXPrILyIFti6A",
+      authDomain: "gpslocalsbackend.firebaseapp.com",
+      databaseURL: "https://gpslocalsbackend-default-rtdb.firebaseio.com",
+      projectId: "gpslocalsbackend",
+      storageBucket: "gpslocalsbackend.appspot.com",
+      messagingSenderId: "587842449786",
+      appId: "1:587842449786:web:2a41f86212057feacc66c3"
+    };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
@@ -50,13 +59,8 @@
 
     window.modoAdicionar = false;
 
-    function ativarModoAdicionar() {
-      modoAdicionar = true;
-      alert("Modo de adição ativado. Clique no mapa para marcar o grupo.");
-    }
-
     map.on('click', async function(e) {
-      if (!modoAdicionar) return;
+      if (!window.modoAdicionar) return;
       const nome = document.getElementById("nomeGrupo").value.trim();
       if (!nome) return alert("Digite o nome do grupo");
 
@@ -67,30 +71,4 @@
       await set(ref(db, 'grupos/' + id), { nome, lat, lng });
 
       L.marker([lat, lng]).addTo(map)
-        .bindTooltip(nome, { permanent: true, direction: 'top', offset: [0, -10] });
-
-      modoAdicionar = false;
-    });
-
-    get(child(ref(db), 'grupos')).then(snapshot => {
-      if (snapshot.exists()) {
-        const grupos = snapshot.val();
-        Object.values(grupos).forEach(g => {
-          L.marker([g.lat, g.lng]).addTo(map)
-            .bindTooltip(g.nome, { permanent: true, direction: 'top', offset: [0, -10] });
-        });
-      }
-    });
-  </script>
-  <script>
-  // Expor a função para o botão
-  window.ativarModoAdicionar = () => {
-    window.modoAdicionar = true;
-    alert("Modo de adição ativado. Clique no mapa para marcar o grupo.");
-  };
-</script>
-</body>
-</html>
-
-
-
+        .bindTooltip(nome
